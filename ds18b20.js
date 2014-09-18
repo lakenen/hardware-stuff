@@ -5,7 +5,7 @@
  *  - git clone git@github.com:firmata/arduino.git --branch configurable --single-branch /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
  *  - flash the board with ConfigurableFirmata
  *    - File > Examples > Firmata > ConfigurableFirmata
- *    - Click "Upload"
+ *    - Click 'Upload'
  *
  * https://github.com/rwaldron/johnny-five/issues/285
  */
@@ -16,7 +16,10 @@ var five = require('johnny-five'), board
 var pin = 2;
 var board = new five.Board();
 
-board.on("ready", function () {
+board.on('ready', function () {
+
+  var led = new five.Led(13)
+
   board.firmata = board.io;
   board.firmata.sendOneWireConfig(pin, true);
   board.firmata.sendOneWireSearch(pin, function(error, devices) {
@@ -29,6 +32,8 @@ board.on("ready", function () {
     var device = devices[0];
 
     var readTemperature = function() {
+      led.on();
+
       // start transmission
       board.firmata.sendOneWireReset(pin);
 
@@ -51,13 +56,14 @@ board.on("ready", function () {
         var celsius = raw / 16.0;
         var fahrenheit = celsius * 1.8 + 32.0;
 
-        console.info("celsius", celsius);
-        console.info("fahrenheit", fahrenheit);
+        console.info('celsius', celsius);
+        console.info('fahrenheit', fahrenheit);
+        led.off();
       });
     };
     // read the temperature now
     readTemperature();
     // and every five seconds
-    setInterval(readTemperature, 5000);
+    setInterval(readTemperature, 1000);
   });
 });
