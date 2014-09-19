@@ -18,7 +18,8 @@ var board = new five.Board();
 
 board.on('ready', function () {
 
-  var led = new five.Led(13)
+  // var led = new five.Led(8)
+  var led = new five.Led.RGB([9, 10, 11])
 
   board.firmata = board.io;
   board.firmata.sendOneWireConfig(pin, true);
@@ -32,7 +33,7 @@ board.on('ready', function () {
     var device = devices[0];
 
     var readTemperature = function() {
-      led.on();
+      // led.on();
 
       // start transmission
       board.firmata.sendOneWireReset(pin);
@@ -58,12 +59,57 @@ board.on('ready', function () {
 
         console.info('celsius', celsius);
         console.info('fahrenheit', fahrenheit);
-        led.off();
+        updateLed(celsius, led)
+        // led.off();
       });
     };
     // read the temperature now
     readTemperature();
     // and every five seconds
-    setInterval(readTemperature, 1000);
+    setInterval(readTemperature, 500);
   });
 });
+
+
+function updateLed(temp, led) {
+  var h = (30 - temp) * 2
+  console.log(h)
+  setHue(h, led)
+}
+
+function setHue(h, led) {
+  led.color(rgbToHex.apply(null, hslToRgb(h / 256, 1, 0.5)))
+}
+
+function hslToRgb(h, s, l){
+  var r, g, b;
+
+  if(s == 0){
+    r = g = b = l; // achromatic
+  }else{
+    function hue2rgb(p, q, t){
+      if(t < 0) t += 1;
+      if(t > 1) t -= 1;
+      if(t < 1/6) return p + (q - p) * 6 * t;
+      if(t < 1/2) return q;
+      if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    }
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
