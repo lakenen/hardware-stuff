@@ -13,6 +13,7 @@
 
 var five = require('johnny-five'), board
 
+// the pin the DS18B20 is connected on
 var pin = 2;
 var board = new five.Board();
 
@@ -65,15 +66,14 @@ board.on('ready', function () {
     };
     // read the temperature now
     readTemperature();
-    // and every five seconds
-    setInterval(readTemperature, 500);
+    // and every 1 second
+    setInterval(readTemperature, 1000);
   });
 });
 
 
 function updateLed(temp, led) {
   var h = (30 - temp) * 2
-  console.log(h)
   setHue(h, led)
 }
 
